@@ -109,15 +109,27 @@ d3.json("output/ageWiseLiterateDistribution.json", function(error, data) {
       .attr("dy", "-.55em")
       .attr("transform", "rotate(-60)" );
 
+      svg.append("text")
+        .attr("x", 300)
+        .attr("y",280)
+        .attr("font-size","16px")
+        .style("font-weight", "bold")
+        
+        .style("text-anchor", "end")
+        .text("Age group");
+
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 5)
+      .attr("y", -85)
+      .attr("x", -100)
+      .attr("font-size","16px")
+      .style("font-weight", "bold")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("population");
+      .text("Population");
 
 
   // Add bar chart

@@ -34,8 +34,8 @@ margin: auto;
 
 // set the dimensions of the canvas
 var margin = {top: 20, right: 20, bottom: 200, left: 100},
-width = 1000 - margin.left - margin.right,
-height = 600 - margin.top - margin.bottom;
+width = 800 - margin.left - margin.right,
+height = 500 - margin.top - margin.bottom;
 
 // set the ranges
 var x = d3.scaleBand().rangeRound([0, width]).padding(0.2);
@@ -85,10 +85,17 @@ svg.append("g")
 .attr("class", "y axis")
 .call(d3.axisLeft(y))
 .append("text")
-
 .attr("dy", "-5em")
 .attr("dx", "-10em")
 .style("text-anchor", "end");
+svg.append("text")
+        .attr("y", -75)
+        .attr("x",-70)
+        .attr("font-size","18px")
+        .style("font-weight", "bold")
+        .attr("transform", "rotate(-90)")
+        .style("text-anchor", "end")
+        .text("Graduate Population ");
 
 // svg.selectAll(rect)
 // .data(data)
@@ -116,6 +123,13 @@ area.selectAll("rect")
 .style("fill", function(d) {return color(d.name);});
 
 
+svg.append("text")
+        .attr("x", 350)
+        .attr("y",430)
+        .attr("font-size","20px")
+        .style("font-weight", "bold")
+        .style("text-anchor", "end")
+        .text("State");
 
 //Adding legend
 var legend = svg.selectAll(".legend")
@@ -124,12 +138,12 @@ var legend = svg.selectAll(".legend")
    .attr("class", "legend")
    .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
    legend.append("rect")
-   .attr("x", width - 494)
+   .attr("x", width - 394)
    .attr("width", 18)
    .attr("height", 18)
    .style("fill", color);
    legend.append("text")
-   .attr("x", width - 500)
+   .attr("x", width - 400)
    .attr("y", 9)
    .attr("dy", ".35em")
    .style("text-anchor", "end")
