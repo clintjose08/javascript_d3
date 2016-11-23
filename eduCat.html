@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Education Category wise - all India data combined together</title>
+  <link rel="stylesheet" type="text/css" href="includes/css/style.css">
+<head>
+	<style>
+
+  .bar{
+    fill: steelblue;
+  }
+
+  .bar:hover{
+    fill: brown;
+  }
+
+	.axis {
+	  font: 10px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	</style>
+</head>
+
+<body align='center'; padding-top=150px;>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<form>
+ <button type="button" onclick="location.href='agelitrate.html';"> Agewise Litretae population</button>
+ <button type="button" onclick="location.href='gradpopState.html';"> Gender/state wise graduate population</button>
+<!-- <button type="button" onclick="location.href='eduCat.html';"> Education Categorywise</button> -->
+</form>
+<script>
+
+Array.prototype.move = function (old_index, new_index) {
+    if (new_index >= this.length) {
+        var k = new_index - this.length;
+        while ((k--) + 1) {
+            this.push(undefined);
+        }
+    }
+    this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+    return this; // for testing purposes
+};
+
+// set the dimensions of the canvas
+var margin = {top: 20, right: 20, bottom: 300, left: 100},
+    width = 600 - margin.left - margin.right,
+    height = 650 - margin.top - margin.bottom;
+
+
+// set the ranges
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .3);
+
+var y = d3.scale.linear().range([height, 0]);
+
+// define the axis
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(10);
+
+// var tip = d3.tip()
+//       .attr('class', 'd3-tip')
+//       .offset([-10, 0])
+//       .html(function(d) {
+//         return "<strong>Total Literate Population:</strong> <span style='color:red'>" + d.totalPop + "</span>";
+//       })
+
+// add the SVG element
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", 
+          "translate(" + margin.left + "," + margin.top + ")");
+    //svg.call(tip);
+
+var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+// load the data
+d3.json("output/eduCategWise.json", function(error, data) {
+	if (error) throw error;
+  // alert(data);
+  // alert("sadasd");
+  var xDomain = data.map(function(d) { return d.eduCateg; });
+
+  xDomain = xDomain.move(xDomain.indexOf('0-6'),0);
+  x.domain(xDomain);
+  y.domain([0, d3.max(data, function(d) {  return d.totalPop; })]);
+
+  // add axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", "-.55em")
+      .attr("transform", "rotate(-60)" );
+
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 5)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Population");
+
+
+  // Add bar chart
+  svg.selectAll("bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.eduCateg); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.totalPop); })
+      .attr("height", function(d) { return height - y(d.totalPop); })
+      .on("mouseover", function(d) {
+        div.transition()
+        .duration(200)
+        .style("opacity", 1);
+        div.html(d["totalPop"])
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+         })
+        .on("mouseout", function(d) {
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+        });
+
+});
+
+</script>
+
+</body>

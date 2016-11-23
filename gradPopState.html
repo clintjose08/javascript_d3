@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graduate Population of India - State-wise & Gender-wise.</title>
+  <link rel="stylesheet" type="text/css" href="includes/css/style.css">
+<head>
+<style>
+body {
+ font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+ fill: none;
+ stroke: #000;
+ shape-rendering: crispEdges;
+}
+.bar {
+ fill: steelblue;
+}
+svg{
+ display: block;
+margin: auto;
+}
+</style>
+</head>
+<body align="center">
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<form>
+ <button type="button" onclick="location.href='agelitrate.html';"> Agewise Litretae population</button>
+ <!-- <button type="button" onclick="location.href='gradpopState.html';"> Gender/state wise graduate population</button>-->
+<button type="button" onclick="location.href='eduCat.html';"> Education Categorywise</button>
+</form>
+<script>
+
+// set the dimensions of the canvas
+var margin = {top: 20, right: 20, bottom: 200, left: 100},
+width = 1000 - margin.left - margin.right,
+height = 600 - margin.top - margin.bottom;
+
+// set the ranges
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.2);
+var y = d3.scaleLinear().rangeRound([height, 0]);
+var color =d3.scaleOrdinal().range(["#3e79da ", "#f97907 "]);
+
+
+// add the SVG element
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+// load the data
+d3.json ("output/gradPopStateAndGradeWise.json", function (error, data) {
+
+color.domain(d3.keys(data[0]).filter(function(area) { return area !== "area"; }));
+data.forEach(function(d) {
+var y0 = 0;
+d.concent = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]};});
+d.total = d.concent[d.concent.length - 1].y1;//Adding all values
+
+});
+
+
+// scale the range of the data
+x.domain(data.map(function(d) { return d.area; }));
+y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+//xAxis
+svg.append("g")
+.attr("class", "x axis")
+.attr("transform", "translate(0," + height + ")")
+.call(d3.axisBottom(x))
+.selectAll("text")
+.style("text-anchor", "end")
+.attr("dy", "-1em")
+.attr("dx", "-1em")
+.attr("transform", "rotate(-90)")
+
+svg.append("g")
+.attr("class", "y axis")
+.call(d3.axisLeft(y))
+.append("text")
+
+.attr("dy", "-5em")
+.attr("dx", "-10em")
+.style("text-anchor", "end");
+
+// svg.selectAll(rect)
+// .data(data)
+// .enter()
+// .append('rect')
+// .attr({
+//     "x"=function(d) {return x{d.area}},
+//     "y"=function(d) {return y{d.gradMales}},
+//     "width" = x.rangeBand(),
+//     "height"= function(d) {return height-y(d.gradMales);}
+// });
+
+//yAxis
+var area = svg.selectAll(".area")
+.data(data)
+.enter().append("g")
+.attr("class", "g")
+.attr("transform", function(d) { return "translate(" + x(d.area) + ",0)"; });
+area.selectAll("rect")
+.data(function(d) { return d.concent; })
+.enter().append("rect")
+.attr("width", x.bandwidth())
+.attr("y", function(d) { return y(d.y1); })
+.attr("height", function(d) { return y(d.y0) - y(d.y1); })
+.style("fill", function(d) {return color(d.name);});
+
+
+
+//Adding legend
+var legend = svg.selectAll(".legend")
+   .data(color.domain().slice().reverse())
+   .enter().append("g")
+   .attr("class", "legend")
+   .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+   legend.append("rect")
+   .attr("x", width - 494)
+   .attr("width", 18)
+   .attr("height", 18)
+   .style("fill", color);
+   legend.append("text")
+   .attr("x", width - 500)
+   .attr("y", 9)
+   .attr("dy", ".35em")
+   .style("text-anchor", "end")
+   .text(function(d) { return d; })
+   .on('mouseover', function (d) {
+        var xPos = parseFloat(d3.select(this).attr('x')) / 2 + width / 2;
+        var yPos = parseFloat(d3.select(this).attr('y')) + yScale.rangeBand() / 2;
+
+        d3.select('#tooltip')
+            .style('left', xPos + 'px')
+            .style('top', yPos + 'px')
+            .select('#value')
+            .text(d.x);
+
+        d3.select('#tooltip').classed('hidden', false);
+    })
+        .on('mouseout', function () {
+        d3.select('#tooltip').classed('hidden', true);
+    });
+
+// svg.selectAll("bar")
+//       .data(data)
+//     .enter().append("rect")
+//       .attr("class", "bar")
+//       .attr("x", function(d) { return x(d.area); })
+//       .attr("width", x.rangeBand())
+//       .attr("y", function(d) { return y(d.gradFemales); })
+//       .attr("height", function(d) { return height - y(d.gradFemales); })
+// .on("mouseover", function(d) {
+//         div.transition()
+//         .duration(200)
+//         .style("opacity", 1);
+//         div.html(d["gradMales"])
+//         .style("left", (d3.event.pageX) + "px")
+//         .style("top", (d3.event.pageY - 28) + "px");
+//          })
+//         .on("mouseout", function(d) {
+//         div.transition()
+//         .duration(500)
+//         .style("opacity", 0);
+//         });
+
+
+});
+</script>
+</body>
+</html>
