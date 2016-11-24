@@ -2,7 +2,7 @@ var ageWiseLiterateDistribution = new Object();
 var gradPopStateAndGradeWise = new Object();
 var eduCategWise = new Object();
 
-function d3DataFormatter (objObj) {
+function dataFormat (objObj) {
   var arrObj =  new Array();
   for(key in objObj) {
     arrObj.push(objObj[key]);
@@ -10,7 +10,7 @@ function d3DataFormatter (objObj) {
   return arrObj;
 }
 
-function textToArrayHash(text) {
+function textArray(text) {
   var headerLine = new Array();
   text.split("\n").map(function(strLine, lineNum){
       if(strLine !== '') {
@@ -20,15 +20,12 @@ function textToArrayHash(text) {
           ageKey = arrLine[5].trim();
           if (arrLine[4] == "Total" ) {
             if (arrLine[5] != "All ages") {
-              //For First Age wise Total Literate Population JSON
+              //For Age wise Total Literate Population
               arrLine[12] = parseInt(arrLine[12]);
               if(ageKey in ageWiseLiterateDistribution){
                 ageWiseLiterateDistribution[ageKey].TotalLiteratePop += arrLine[12];
-                // ageWiseLiterateDistribution[ageKey].headerLine[12] += arrLine[12];
               }
               else {
-                //console.log("Keys are "+ Object.keys(ageWiseLiterateDistribution));
-                //console.log("key" + ageKey);
                 ageWiseLiterateDistribution[ageKey] = new Object();
                 ageWiseLiterateDistribution[ageKey].ageGroup = ageKey;
                 ageWiseLiterateDistribution[ageKey].TotalLiteratePop = arrLine[12];
@@ -36,7 +33,7 @@ function textToArrayHash(text) {
               }
             }
             else {
-              //For Second Statwise and gender wise Graduate Population
+              //For Statewise and gender wise Graduate Population
               var areaKey = arrLine[3].trim();
               var gradM = parseInt(arrLine[40]);
               var gradF = parseInt(arrLine[41]);
@@ -50,10 +47,11 @@ function textToArrayHash(text) {
 
               }
 
-              //For Third Education Category wise - all India data combined together
+              //For Education Category wise - all India
               for(eduCatIndex=15;eduCatIndex<44;eduCatIndex+=3) {
                 // console.log(headerLine);
                 var eduCatValue = headerLine[eduCatIndex].trim().match(/.*- (.*) -.*/)[1];
+                //console.log(eduCatValue);
                 var totalPopValue = parseInt(arrLine[eduCatIndex]);
                 if (eduCatValue in eduCategWise) {
                   eduCategWise[eduCatValue].totalPop += totalPopValue;
@@ -71,7 +69,6 @@ function textToArrayHash(text) {
         else {
             // console.log(lineNum);
             headerLine = arrLine;
-            // console.log(headerLine);
         }
     }
 
@@ -79,26 +76,24 @@ function textToArrayHash(text) {
 }
 
 function fileReader(fileNames) {
-
     fileNames.map(function(fileName){
       // console.log("***Keys After File Read"+ Object.keys(ageWiseLiterateDistribution));
       var fs = require('fs');
       var data = fs.readFileSync(fileName).toString();
       //console.log("For File: "+fileName);
-      textToArrayHash(data);
+      textArray(data);
     });
-    ageWiseLiterateDistribution = d3DataFormatter(ageWiseLiterateDistribution);
+    ageWiseLiterateDistribution = dataFormat(ageWiseLiterateDistribution);
     // console.log(ageWiseLiterateDistribution);
-    gradPopStateAndGradeWise = d3DataFormatter(gradPopStateAndGradeWise);
+    gradPopStateAndGradeWise = dataFormat(gradPopStateAndGradeWise);
     // console.log(gradPopStateAndGradeWise);
-    eduCategWise = d3DataFormatter(eduCategWise);
-
-
-  // console.log(eduCategWise);
+    eduCategWise = dataFormat(eduCategWise);
+// console.log(eduCategWise);
 }
+
+
 function dataDumper(){
     var fs = require('fs');
-    // console.log(ageWiseLiterateDistribution);
     fs.writeFile("output/ageWiseLiterateDistribution.json",JSON.stringify(ageWiseLiterateDistribution),function(err) {
       if (err) throw err;
       console.log('Age wise Literate data file is saved!');
